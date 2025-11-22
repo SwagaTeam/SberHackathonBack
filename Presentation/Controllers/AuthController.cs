@@ -1,7 +1,7 @@
 using Application.Dto;
 using Application.Services.Abstractions;
+using Domain.Constants;
 using Domain.Entities;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,11 +29,10 @@ public class AuthController(IAuthService auth) : ControllerBase
     }
 
     /// <summary>
-    ///     Создание нового пользователя. (Роли - Admin, Deputy, Helper)
+    ///     Создание нового пользователя. (Роли - Admin, Reader, Librarian)
     /// </summary>
     /// <param name="req">
-    ///     Объект запроса с Email, полным именем, паролем и ролями пользователя, а также ID привязанного
-    ///     депутата, если пользователь помощник.
+    ///     Объект запроса с Email, полным именем, паролем и ролями пользователя
     /// </param>
     /// <returns>
     ///     201 Created с информацией о созданном пользователе.
@@ -43,7 +42,10 @@ public class AuthController(IAuthService auth) : ControllerBase
     [ProducesResponseType(typeof(User), 200)]
     public async Task<IActionResult> Create([FromBody] CreateUserRequest req)
     {
-        if (req.Role is null) return ValidationProblem("Не заданы роли пользователя");
+        var roles = new string[] { RolesConstants.Admin, RolesConstants.Reader, RolesConstants.Librarian };
+
+        if (req.Role is null || roles.Contains(req.Role) is false)
+            return ValidationProblem("Не заданы роли пользователя");
         
         var user = await auth.CreateUserAsync(req.PhoneNumber, req.FullName, req.Password, req.Role, req.BirthDate);
         var userDto = new UserDto(user.Id, user.Email, user.PhoneNumber, user.Username, user.UserBooks.Select(x=>new BorrowRecordDto

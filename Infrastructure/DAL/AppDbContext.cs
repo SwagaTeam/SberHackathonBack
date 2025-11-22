@@ -8,6 +8,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<User> Users => Set<User>();
     public DbSet<BorrowRecord> BorrowRecords => Set<BorrowRecord>();
     public DbSet<Book> Books => Set<Book>();
+    public DbSet<Chat> Chats => Set<Chat>();
     public DbSet<Event> Events => Set<Event>();
     public DbSet<UserEvent> UserEvents => Set<UserEvent>();
     public DbSet<Library> Libraries => Set<Library>();

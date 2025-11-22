@@ -5,10 +5,25 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>SberHackathonBack</RootNamespace>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>$(NoWarn);1591</NoWarn>
+		<UserSecretsId>7d665199-513d-4b30-a08e-50ea6d6ef01a</UserSecretsId>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10"/>
+        <PackageReference Include="DotNetEnv" Version="3.1.1" />
+        <PackageReference Include="Hangfire" Version="1.8.22" />
+        <PackageReference Include="Hangfire.PostgreSql" Version="1.20.12" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.11" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
+        <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+        <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+        <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="9.0.6" />
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.6" />
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="9.0.6" />
     </ItemGroup>
 
     <ItemGroup>
