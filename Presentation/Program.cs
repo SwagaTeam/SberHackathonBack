@@ -221,7 +221,11 @@ public static class Program
                 {
                     new OpenApiSecurityScheme
                     {
-                        Type = SecuritySchemeType.Http
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
                     },
                     new string[] { }
                 }
