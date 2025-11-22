@@ -4,16 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.DAL.Repository;
 
-public class GenericRepository<T> : IRepository<T> where T : class
+public class GenericRepository<T>(AppDbContext db) : IRepository<T>
+    where T : class
 {
-    private readonly AppDbContext _db;
-    protected readonly DbSet<T> Set;
-
-    public GenericRepository(AppDbContext db)
-    {
-        _db = db;
-        Set = db.Set<T>();
-    }
+    protected readonly DbSet<T> Set = db.Set<T>();
 
 
     public virtual async Task AddAsync(T entity)
@@ -37,6 +31,11 @@ public class GenericRepository<T> : IRepository<T> where T : class
     public virtual void DeleteRange(IEnumerable<T> entities)
     {
         Set.RemoveRange(entities);
+    }
+
+    public async Task<int> SaveChangesAsync()
+    {
+        return await db.SaveChangesAsync();
     }
 
 

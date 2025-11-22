@@ -60,4 +60,19 @@ public class UserService(IUserRepository userRepository) : IUserService
     {
         return await userRepository.ListAsync(null, skip, take);
     }
+
+    public async Task<bool> IsUserExistAsync(string phoneNumber)
+    {
+        return await userRepository.ExistsAsync(x=>x.PhoneNumber == phoneNumber);
+    }
+
+    public async Task AddAsync(User user)
+    {
+        await userRepository.AddAsync(user);
+    }
+
+    public async Task<int> SaveAsync()
+    {
+        return await userRepository.SaveChangesAsync();
+    }
 }

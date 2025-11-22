@@ -23,6 +23,8 @@ public interface IRepository<T> where T : class
     void Update(T entity);
     void Delete(T entity);
     void DeleteRange(IEnumerable<T> entities);
+    
+    Task<int> SaveChangesAsync();
 
 
     Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);
