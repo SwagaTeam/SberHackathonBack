@@ -92,9 +92,8 @@ public static class Program
     {
         var config = builder.Configuration;
 
-        var conn = config.GetValue<string>("DB_CONNECTION") ?? 
-                   "Host=db;Port=5432;Database=db;Username=user;Password=pass";
-
+        var conn = config.GetValue<string>("DB_CONNECTION") ??
+                   "Host=swaga-sber-postgres;Port=5432;Database=db;Username=user;Password=pass";
 
         builder.Services.AddHangfire(config => config
             .UseSimpleAssemblyNameTypeSerializer()
@@ -206,21 +205,21 @@ public static class Program
         {
             options.SwaggerDoc("v1", new OpenApiInfo
             {
-                Title = "Library Ticker API",
+                Title = "Deputy API",
                 Version = "v1",
-                Description = "API ??? ?????????? ????????????? ??????"
+                Description = "API дл€ депутатского приложени€"
             });
 
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
-                Description = "??????? ??? JWT",
+                Description = "¬ведите 'Bearer' [пробел] и ваш JWT",
                 Name = "Authorization",
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.Http,
                 Scheme = "Bearer",
                 BearerFormat = "JWT"
             });
-            
+
             options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                 {
