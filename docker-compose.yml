@@ -1,5 +1,3 @@
-version: '3.8'
-
 volumes:
   postgres-data:
     external: false
@@ -30,16 +28,18 @@ services:
     networks:
       - swaga-sber-network
 
-  app:
-    container_name: sberhackathon-app
-    build: .
+  server:
+    container_name: swaga-sber-server
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.Server
+    environment:
+      - DOTNET_RUNNING_IN_CONTAINER=true
+    restart: always
     depends_on:
       db:
         condition: service_healthy
-    ports:
-      - "5000:80"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=db;Username=user;Password=pass
     networks:
       - swaga-sber-network
+    ports:
+      - "8080:8080"
