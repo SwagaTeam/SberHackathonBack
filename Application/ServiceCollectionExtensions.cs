@@ -14,7 +14,6 @@ namespace Application
             services.AddScoped<IEventService, EventService>();
             services.AddScoped<ILibraryBookService, LibraryBookService>();
             services.AddScoped<ILibraryService, LibraryService>();
-            services.AddScoped<IUserEventService, UserEventService>();
             services.AddScoped<IUserService, UserService>();
 
             return services;
