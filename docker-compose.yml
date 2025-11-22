@@ -34,10 +34,12 @@ services:
       context: .
       dockerfile: docker/Dockerfile.Server
     environment:
-      - DOTNET_RUNNING_IN_CONTAINER=true
-      - JWT_KEY=1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef 
-      - TELEGRAM_BOT_TOKEN=8368555733:AAGCgEu1ULrkjoQxWnQjavaA2ahlRRGQPdA
-      - TELEGRAM_CHAT_ID=5919096262
+      DOTNET_RUNNING_IN_CONTAINER: true
+      JWT_KEY: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef 
+      TELEGRAM_BOT_TOKEN: 8368555733:AAGCgEu1ULrkjoQxWnQjavaA2ahlRRGQPdA
+      TELEGRAM_CHAT_ID: 5919096262
+      Telegram__UseWebhook: false
+      Telegram__WebhookUrl: https://irit-rtf-ep.ru/api/telegram
     restart: always
     depends_on:
       db:
