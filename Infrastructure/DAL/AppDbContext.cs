@@ -8,6 +8,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<User> Users => Set<User>();
     public DbSet<BorrowRecord> BorrowRecords => Set<BorrowRecord>();
     public DbSet<Book> Books => Set<Book>();
+    public DbSet<Event> Events => Set<Event>();
+    public DbSet<UserEvent> UserEvents => Set<UserEvent>();
+    public DbSet<Library> Libraries => Set<Library>();
+    public DbSet<LibraryBooks> LibraryBooks => Set<LibraryBooks>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

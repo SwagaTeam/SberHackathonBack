@@ -4,15 +4,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.DAL.Repository.Implementations;
 
-public class UserRepository : GenericRepository<User>, IUserRepository
+public class UserRepository(AppDbContext db) : GenericRepository<User>(db), IUserRepository
 {
-    private AppDbContext _db;
-
-    public UserRepository(AppDbContext db) : base(db)
-    {
-        _db = db;
-    }
-
     public async Task<User?> FindByEmailAsync(string email)
     {
         return await Set
