@@ -9,4 +9,5 @@ public class Review
     public string Text { get; set; }
     public Guid BookId { get; set; }
     public string BookName { get; set; }
+    public virtual Book Book { get; set; }
 }

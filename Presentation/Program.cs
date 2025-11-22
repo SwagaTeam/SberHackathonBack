@@ -6,6 +6,7 @@ using Application.Notifications;
 using Application.Services.Abstractions;
 using Application.Services.Implementations;
 using Application.Storage;
+using Domain.Entities;
 using DotNetEnv;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -28,7 +29,7 @@ namespace Presentation;
 
 public static class Program
 {
-    // контролируем режим из конфигурации
+    // ???????????? ????? ?? ????????????
     public static bool UseWebHook;
     public static string? WebhookUrl;
 
@@ -100,6 +101,10 @@ public static class Program
             {
                 options.UseNpgsqlConnection(conn);
             }));
+        
+        builder.Services.AddHttpClient(); // Register HttpClient for DI
+        builder.Services.AddScoped<IPasswordHasher, PasswordHasher>(); // Or use a more general version
+
 
         builder.Services.AddSignalR();
 
@@ -145,7 +150,7 @@ public static class Program
         builder.Services.AddEndpointsApiExplorer();
         ConfigureSwagger(builder);
 
-        // Telegram - регистраци€ и выбор режима
+        // Telegram - ??????????? ? ????? ??????
         ConfigureTelegramNotify(builder);
     }
 
@@ -161,7 +166,7 @@ public static class Program
             {
                 var jwtKey = Environment.GetEnvironmentVariable("JWT_KEY");
                 if (string.IsNullOrEmpty(jwtKey))
-                    throw new Exception("JWT_KEY не задан");
+                    throw new Exception("JWT_KEY ?? ?????");
 
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -201,12 +206,12 @@ public static class Program
             {
                 Title = "Library Ticker API",
                 Version = "v1",
-                Description = "API дл€ приложени€ читательского билета"
+                Description = "API ??? ?????????? ????????????? ??????"
             });
 
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
-                Description = "¬ведите ваш JWT",
+                Description = "??????? ??? JWT",
                 Name = "Authorization",
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.Http,
@@ -234,7 +239,7 @@ public static class Program
 
     private static void ConfigureTelegramNotify(WebApplicationBuilder builder)
     {
-        // читаем конфиг один раз при старте
+        // ?????? ?????? ???? ??? ??? ??????
         UseWebHook = builder.Configuration.GetValue<bool>("Telegram:UseWebhook");
         WebhookUrl = builder.Configuration["Telegram:WebhookUrl"];
 
@@ -248,17 +253,17 @@ public static class Program
         builder.Services.AddScoped<TelegramMessageHandler>();
         builder.Services.AddScoped<TgEventNotificationHandler>();
 
-        // notification service (можно передать default chat id из env)
+        // notification service (????? ???????? default chat id ?? env)
         var defaultChatId = builder.Configuration.GetValue<string>("TELEGRAM_CHAT_ID");
 
-        // регистрируем конкретную реализацию как singleton
+        // ???????????? ?????????? ?????????? ??? singleton
         builder.Services.AddSingleton<TelegramNotificationService>(sp =>
             new TelegramNotificationService(sp.GetRequiredService<ITelegramBotClient>(), defaultChatId));
 
-        // св€зываем интерфейс с той же инстанцией
+        // ????????? ????????? ? ??? ?? ??????????
         builder.Services.AddSingleton<INotificationService>(sp => sp.GetRequiredService<TelegramNotificationService>());
 
-        // hosted polling worker только если не webhook
+        // hosted polling worker ?????? ???? ?? webhook
         if (!UseWebHook)
             builder.Services.AddHostedService<TelegramBotWorker>();
     }
@@ -299,7 +304,7 @@ public static class Program
             if (UseWebHook)
             {
                 if (string.IsNullOrEmpty(WebhookUrl))
-                    throw new Exception("WebhookUrl не задан в конфигурации");
+                    throw new Exception("WebhookUrl ?? ????? ? ????????????");
 
                 var setReq = new SetWebhookRequest
                 {
@@ -314,7 +319,7 @@ public static class Program
             }
             else
             {
-                // удал€ем webhook чтобы polling не конфликтовал
+                // ??????? webhook ????? polling ?? ????????????
                 var delResult = await botClient.SendRequest(new DeleteWebhookRequest { DropPendingUpdates = true }, ct);
                 Log.Information("DeleteWebhook result: {Result}", delResult);
 
@@ -325,7 +330,7 @@ public static class Program
         catch (Exception ex)
         {
             Log.Error(ex, "Telegram webhook/polling init failed");
-            // не падаем полностью, но логируем и продолжаем
+            // ?? ?????? ?????????, ?? ???????? ? ??????????
         }
     }
 }

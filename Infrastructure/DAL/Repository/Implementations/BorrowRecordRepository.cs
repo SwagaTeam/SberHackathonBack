@@ -1,6 +1,5 @@
 using Domain.Entities;
 using Infrastructure.DAL.Repository.Abstractions;
-using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.DAL.Repository.Implementations;
 
