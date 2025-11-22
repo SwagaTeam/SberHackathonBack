@@ -16,4 +16,5 @@ public interface IBookService
     Task<Guid> CreateBook(CreateBookRequest bookReq);
     Task<Guid> SendReview(ReviewRequest req);
     Task<IEnumerable<ReviewResponse>> GetReviews(Guid bookId);
+    Task<Guid> GiveBookInHand(Guid userId, Guid bookId);
 }

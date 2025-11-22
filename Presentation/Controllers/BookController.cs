@@ -57,4 +57,11 @@ public class BookController(IBookService bookService, IAIService aiService, IAut
     {
         return Ok(await bookService.GetReviews(bookId));
     }
+
+    [HttpPost("give-book/{bookId}")]
+    [Authorize("Librarian,Admin")]
+    public async Task<IActionResult> GiveBook(Guid bookId, [FromQuery] Guid userId)
+    {
+        return Ok(await bookService.GiveBookInHand(userId, bookId));
+    }
 }

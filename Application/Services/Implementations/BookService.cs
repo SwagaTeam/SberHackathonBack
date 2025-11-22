@@ -9,7 +9,7 @@ public class BookService(
     IBorrowRecordRepository borrowRecordRepository,
     IBookRepository bookRepository,
     ILibraryService libraryService,
-    ILibraryBookService libraryBookService, IReviewRepository reviewRepository) : IBookService
+    ILibraryBookService libraryBookService, IReviewRepository reviewRepository, IUserService userService) : IBookService
 {
     public async Task<Guid> CreateBook(CreateBookRequest bookReq)
     {
@@ -107,6 +107,23 @@ public class BookService(
             BookName = x.BookName,
             UserId = x.AuthorId,
         }) ?? throw new ArgumentException();
+    }
+
+    public async Task<Guid> GiveBookInHand(Guid userId, Guid bookId)
+    {
+        var book = await GetByIdAsync(bookId);
+        if (book is null) throw new ArgumentException();
+        if (book.Count < 1) throw new ArgumentException();
+        var user = await userService.GetByIdAsync(userId);
+        if (user is null) throw new ArgumentException();
+        if (!user.UserBooks.Any(x => x.BookId == bookId && !x.InHand)) throw new ArgumentException();
+        var uB = user.UserBooks.First(x => x.BookId == bookId);
+        uB.InHand = true;
+        uB.IsReserved = false;
+        await userService.SaveAsync();
+        await borrowRecordRepository.SaveChangesAsync();
+        await bookRepository.SaveChangesAsync();
+        return uB.Id;
     }
 
     public async Task<Guid> SendReview(ReviewRequest req)
