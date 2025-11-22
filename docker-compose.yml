@@ -46,3 +46,18 @@ services:
       - swaga-sber-network
     ports:
       - "8080:8080"
+  
+  client:
+    container_name: swaga-sber-client
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.Client
+    environment:
+      - BACKEND_HOST=http://server
+      - BACKEND_PORT=8080
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    networks:
+      - swaga-sber-network
