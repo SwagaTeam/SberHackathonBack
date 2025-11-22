@@ -32,3 +32,4 @@ namespace Application.Notifications
             await Task.WhenAll(tasks);
         }
     }
+}
