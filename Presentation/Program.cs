@@ -6,12 +6,13 @@ using Application.Notifications;
 using Application.Services.Abstractions;
 using Application.Services.Implementations;
 using Application.Storage;
-using Domain.Entities;
 using DotNetEnv;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Infrastructure;
 using Infrastructure.DAL;
+using Infrastructure.DAL.Repository.Abstractions;
+using Infrastructure.DAL.Repository.Implementations;
 using Infrastructure.Initializers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -246,24 +247,25 @@ public static class Program
         var tgToken = builder.Configuration.GetValue<string>("TELEGRAM_BOT_TOKEN") ??
                       builder.Configuration.GetValue<string>("Telegram:Token") ?? "";
 
-        // singleton client
+        // singleton client (бот)
         builder.Services.AddSingleton<ITelegramBotClient>(_ => new TelegramBotClient(tgToken));
 
-        // core handlers
+        // handlers и репозитории Ч scoped
+        builder.Services.AddScoped<IChatRepository, ChatRepository>();
         builder.Services.AddScoped<TelegramMessageHandler>();
         builder.Services.AddScoped<TgEventNotificationHandler>();
 
-        // notification service (????? ???????? default chat id ?? env)
-        var defaultChatId = builder.Configuration.GetValue<string>("TELEGRAM_CHAT_ID");
+        // TelegramNotificationService Ч scoped (т.к. требует репозиторий)
+        builder.Services.AddScoped<TelegramNotificationService>(sp =>
+            new TelegramNotificationService(
+                sp.GetRequiredService<ITelegramBotClient>(),
+                sp.GetRequiredService<IChatRepository>(),
+                null));
 
-        // ???????????? ?????????? ?????????? ??? singleton
-        builder.Services.AddSingleton<TelegramNotificationService>(sp =>
-            new TelegramNotificationService(sp.GetRequiredService<ITelegramBotClient>(), defaultChatId));
+        // прив€зываем интерфейс
+        builder.Services.AddScoped<INotificationService>(sp => sp.GetRequiredService<TelegramNotificationService>());
 
-        // ????????? ????????? ? ??? ?? ??????????
-        builder.Services.AddSingleton<INotificationService>(sp => sp.GetRequiredService<TelegramNotificationService>());
-
-        // hosted polling worker ?????? ???? ?? webhook
+        // hosted polling worker Ч оставл€ем (он создаЄт scope дл€ обработки сообщений)
         if (!UseWebHook)
             builder.Services.AddHostedService<TelegramBotWorker>();
     }
