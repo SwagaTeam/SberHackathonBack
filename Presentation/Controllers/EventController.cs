@@ -35,7 +35,7 @@ public class EventController(IEventService eventService, IAuthService authServic
 
     [HttpPost("sign/{eventId}")]
     [Authorize]
-    public async Task<IActionResult> Sign([FromQuery] Guid eventId)
+    public async Task<IActionResult> Sign(Guid eventId)
     {
         var currentUser = await authService.GetCurrentUserAsync();
         var id = await eventService.Sign(eventId, currentUser.Id);
@@ -44,7 +44,7 @@ public class EventController(IEventService eventService, IAuthService authServic
 
     [HttpPost("unsign/{eventId}")]
     [Authorize]
-    public async Task<IActionResult> UnSign([FromQuery] Guid eventId)
+    public async Task<IActionResult> UnSign(Guid eventId)
     {
         var currentUser = await authService.GetCurrentUserAsync();
         var id = await eventService.UnSign(eventId, currentUser.Id);

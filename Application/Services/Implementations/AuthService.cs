@@ -29,7 +29,7 @@ public class AuthService(
 
         var token = GenerateJwtToken(user);
 
-        return new AuthResult(token);
+        return new AuthResult(token, user.Role);
     }
 
 

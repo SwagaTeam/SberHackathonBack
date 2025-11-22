@@ -2,6 +2,4 @@ using Domain.Entities;
 
 namespace Application.Dto;
 
-public record AuthResult(
-    string Token
-    );
+public record AuthResult(string Token, string Role);
