@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace SberHackathonBack.Controllers;
 
+[ApiController()]
 [Route("api/[controller]")]
 public class BookController(IBookService bookService, IAIService aiService, IAuthService authService) : ControllerBase
 {
