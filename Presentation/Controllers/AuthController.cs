@@ -41,7 +41,6 @@ public class AuthController(IAuthService auth) : ControllerBase
     /// </returns>
     [HttpPost("create")]
     [ProducesResponseType(typeof(User), 200)]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateUserRequest req)
     {
         if (req.Role is null) return ValidationProblem("Не заданы роли пользователя");
