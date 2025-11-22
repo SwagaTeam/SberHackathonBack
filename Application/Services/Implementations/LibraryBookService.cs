@@ -25,4 +25,11 @@ public class LibraryBookService(ILibraryBookRepository libraryBookRepository) : 
     {
         return await libraryBookRepository.FindSingleAsync(x=>x.BookId == bookId);
     }
+
+    public async Task CreateAsync(Guid bookId, Guid libraryId)
+    {
+        var entity = new  LibraryBooks { BookId = bookId, LibraryId = libraryId };
+        await libraryBookRepository.AddAsync(entity);
+        await libraryBookRepository.SaveChangesAsync();
+    }
 }

@@ -8,4 +8,5 @@ public interface ILibraryBookService
     Task<LibraryBooks> GetByIdAsync(Guid id);
     Task<IEnumerable<LibraryBooks>> GetByLibraryIdAsync(Guid libraryId);
     Task<LibraryBooks> GetByBookId(Guid bookId);
+    Task CreateAsync(Guid bookId, Guid libraryId);
 }

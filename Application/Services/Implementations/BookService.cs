@@ -1,11 +1,36 @@
+using Application.Dto;
 using Application.Services.Abstractions;
 using Domain.Entities;
 using Infrastructure.DAL.Repository.Abstractions;
 
 namespace Application.Services.Implementations;
 
-public class BookService(IBorrowRecordRepository borrowRecordRepository, IBookRepository bookRepository) : IBookService
+public class BookService(IBorrowRecordRepository borrowRecordRepository, IBookRepository bookRepository, ILibraryService libraryService, ILibraryBookService libraryBookService) : IBookService
 {
+    public async Task<Guid> CreateBook(CreateBookRequest bookReq)
+    {
+        ArgumentNullException.ThrowIfNull(bookReq);
+        var book = new Book
+        {
+            Author = bookReq.Author,
+            Count = bookReq.Count,
+            Description = bookReq.Description,
+            Genre = bookReq.Genre,
+            Language = bookReq.Language,
+            ImageUrl = bookReq.ImageUrl,
+            PageCount = bookReq.PageCount,
+            Title = bookReq.Title,
+            Publisher = bookReq.Publisher,
+        };
+
+        var library = await libraryService.GetByIdAsync(bookReq.LibraryId);
+        if (library is null) throw new ArgumentException();
+
+        await bookRepository.AddAsync(book);
+        await bookRepository.SaveChangesAsync();
+        await libraryBookService.CreateAsync(book.Id, bookReq.LibraryId);
+        return book.Id;
+    }
     public async Task<IEnumerable<Book>> ListByUserIdAsync(Guid userId)
     {
         var borrowRecords = await borrowRecordRepository.GetByUserId(userId);
@@ -41,5 +66,30 @@ public class BookService(IBorrowRecordRepository borrowRecordRepository, IBookRe
     public async Task<IEnumerable<Book>> GetAfterReleaseDate(DateOnly date)
     {
         return await bookRepository.FindAsync(x => x.ReleaseDate >= date);
+    }
+
+    public async Task<Guid> ReserveBook(Guid bookId, Guid userId, DateTime returnBy)
+    {
+        var book = await bookRepository.GetByIdAsync(bookId);
+        if (book.Count < 1)
+        {
+            throw new ArgumentException("Book not found");
+        }
+
+        book.Count--;
+        await bookRepository.SaveChangesAsync();
+
+        var borrowRecord = new BorrowRecord
+        {
+            Book = book,
+            UserId = userId,
+            IsReserved = true,
+            ReturnBy = returnBy,
+            ReservedDate = DateTime.Now
+        };
+        
+        await borrowRecordRepository.AddAsync(borrowRecord);
+        await borrowRecordRepository.SaveChangesAsync();
+        return book.Id;
     }
 }

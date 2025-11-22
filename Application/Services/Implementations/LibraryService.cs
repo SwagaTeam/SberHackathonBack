@@ -6,6 +6,10 @@ namespace Application.Services.Implementations;
 
 public class LibraryService(ILibraryRepository libraryRepository) : ILibraryService
 {
+    public async Task<Guid> CreateAsync(Library library)
+    {
+        throw new NotImplementedException();
+    }
     public async Task<Library> GetByIdAsync(Guid id)
     {
         return await libraryRepository.GetByIdAsync(id);
