@@ -1,0 +1,23 @@
+FROM node:18-alpine as builder
+
+WORKDIR /app
+
+# 1. Сначала копируем ТОЛЬКО файлы зависимостей (для кэширования Docker слоев)
+# Убедитесь, что путь frontend/SberHackathon/package*.json правильный относительно места запуска docker build
+COPY frontend/SberHackathon/package*.json ./
+
+# 2. Устанавливаем зависимости
+RUN npm install
+
+# 3. Теперь копируем ВЕСЬ остальной исходный код (папки src, публичные файлы, конфиги)
+# ВАЖНО: Эта команда переносит папку src внутрь контейнера
+COPY frontend/SberHackathon/ .
+
+# 4. Собираем приложение (теперь папка src существует, и TS ее увидит)
+RUN npm run build
+
+# Финальный образ
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
