@@ -98,15 +98,23 @@ public class BookService(
         return book.Id;
     }
 
-    public async Task<Guid> SendReview(ReviewDto req)
+    public async Task<IEnumerable<ReviewResponse>> GetReviews(Guid bookId)
+    {
+        var reviews = await reviewRepository.FindAsync(x=>x.BookId == bookId);
+        return reviews.Select(x=>new ReviewResponse
+        {
+            Author = x.Author,
+            BookName = x.BookName,
+            UserId = x.AuthorId,
+        }) ?? throw new ArgumentException();
+    }
+
+    public async Task<Guid> SendReview(ReviewRequest req)
     {
         var entity = new Review
         {
-            BookId = req.BookId,
             Text = req.Text,
-            Author = req.Author,
-            AuthorId = req.UserId,
-            BookName = req.BookName,
+            Rating = req.Rating,
         };
 
         await reviewRepository.AddAsync(entity);

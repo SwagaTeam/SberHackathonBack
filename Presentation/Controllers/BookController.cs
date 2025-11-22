@@ -44,9 +44,17 @@ public class BookController(IBookService bookService, IAIService aiService, IAut
 
     [HttpPost("review-book/{id}")]
     [Authorize]
-    public async Task<IActionResult> SendReview([FromBody] ReviewDto review)
+    public async Task<IActionResult> SendReview([FromQuery] Guid bookId, [FromBody] ReviewRequest review)
     {
+        review.BookId = bookId;
         var reviewId = await bookService.SendReview(review);
         return Ok(reviewId);
+    }
+
+    [HttpGet("get-book-review/{bookId}")]
+    [Authorize]
+    public async Task<IActionResult> GetReview([FromRoute] Guid bookId)
+    {
+        return Ok(await bookService.GetReviews(bookId));
     }
 }

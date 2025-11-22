@@ -94,7 +94,20 @@ public static class Program
 
         var conn = config.GetValue<string>("DB_CONNECTION") ??
                    "Host=swaga-sber-postgres;Port=5432;Database=db;Username=user;Password=pass";
+        builder.Services.AddAuthorization(options =>
+        {
+            // ???????? ??? Admin
+            options.AddPolicy("Admin", policy =>
+                policy.RequireRole("Admin"));
 
+            // ???????? ??? Reader
+            options.AddPolicy("Reader", policy =>
+                policy.RequireRole("Reader"));
+
+            // ???????? ??? Librarian
+            options.AddPolicy("Librarian", policy =>
+                policy.RequireRole("Librarian"));
+        });
         builder.Services.AddHangfire(config => config
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()

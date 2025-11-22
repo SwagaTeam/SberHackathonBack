@@ -14,5 +14,6 @@ public interface IBookService
     Task<IEnumerable<Book>> GetAfterReleaseDate(DateOnly date);
     Task<Guid> ReserveBook(Guid bookId, Guid userId, DateTime returnBy);
     Task<Guid> CreateBook(CreateBookRequest bookReq);
-    Task<Guid> SendReview(ReviewDto req);
+    Task<Guid> SendReview(ReviewRequest req);
+    Task<IEnumerable<ReviewResponse>> GetReviews(Guid bookId);
 }
