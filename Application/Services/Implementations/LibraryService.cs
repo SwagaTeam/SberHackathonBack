@@ -1,3 +1,4 @@
+using Application.Dto;
 using Application.Services.Abstractions;
 using Domain.Entities;
 using Infrastructure.DAL.Repository.Abstractions;
@@ -6,10 +7,19 @@ namespace Application.Services.Implementations;
 
 public class LibraryService(ILibraryRepository libraryRepository) : ILibraryService
 {
-    public async Task<Guid> CreateAsync(Library library)
+    public async Task<Guid> CreateLibrary(LibraryDto library)
     {
-        throw new NotImplementedException();
+        var entity = new Library
+        {
+            Name = library.Name,
+            Address = library.Address,
+        };
+        
+        await libraryRepository.AddAsync(entity);
+        await libraryRepository.SaveChangesAsync();
+        return entity.Id;
     }
+
     public async Task<Library> GetByIdAsync(Guid id)
     {
         return await libraryRepository.GetByIdAsync(id);
