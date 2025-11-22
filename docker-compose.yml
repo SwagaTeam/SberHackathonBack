@@ -35,6 +35,7 @@ services:
       dockerfile: docker/Dockerfile.Server
     environment:
       - DOTNET_RUNNING_IN_CONTAINER=true
+      - JWT_KEY=1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
     restart: always
     depends_on:
       db:

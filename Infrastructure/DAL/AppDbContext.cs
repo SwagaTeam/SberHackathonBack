@@ -25,7 +25,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             b.HasKey(x => x.Id);
 
             b.Property(x => x.Email).IsUnicode();
-            b.Property(x => x.PhoneNumber).IsUnicode();
+            b.Property(x => x.PhoneNumber).IsRequired().IsUnicode();
             b.Property(x => x.PasswordHash).IsRequired();
             b.Property(x => x.Salt).IsRequired();
             b.Property(x => x.Username).IsUnicode();

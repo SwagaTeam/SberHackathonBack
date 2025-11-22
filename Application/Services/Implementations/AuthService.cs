@@ -29,7 +29,7 @@ public class AuthService(
 
         var token = GenerateJwtToken(user);
 
-        return new AuthResult(token, user);
+        return new AuthResult(token);
     }
 
 
@@ -37,21 +37,22 @@ public class AuthService(
         string roleName, DateOnly birthDate)
     {
         if (await userService.IsUserExistAsync(phoneNumber)) 
-            throw new InvalidOperationException("Пользователь существует");
+            throw new InvalidOperationException("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
 
         if (roleName == RolesConstants.Librarian || 
            roleName == RolesConstants.Admin)
         {
-            var currentUser = await GetCurrentUserAsync() ?? throw new AccessViolationException("Создание нового пользователя с ролью сотрудника невозможно.");
+            var currentUser = await GetCurrentUserAsync() ?? throw new AccessViolationException("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
 
             if (currentUser.Role != RolesConstants.Admin)
-                throw new AccessViolationException($"Только админ может создавать пользователей с ролью {roleName}.");
+                throw new AccessViolationException($"пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ {roleName}.");
         }
 
         var salt = Guid.NewGuid().ToString();
         var user = new User
         {
             Id = Guid.NewGuid(),
+            PhoneNumber = phoneNumber,
             Email = phoneNumber,
             Username = fullName,
             PasswordHash = hasher.HashPassword(password, salt),

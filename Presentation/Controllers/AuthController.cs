@@ -55,7 +55,7 @@ public class AuthController(IAuthService auth) : ControllerBase
             BookName = x.Book.Title,
             InHand = x.InHand,
             ReturnBy = x.ReturnBy,
-            UserId = x.UserId
+            UserId = x.UserId,
         }), user.Created, user.Role);
         return CreatedAtAction(nameof(Get), new { id = user.Id }, userDto);
     }
