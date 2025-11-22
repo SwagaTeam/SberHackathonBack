@@ -92,8 +92,9 @@ public static class Program
     {
         var config = builder.Configuration;
 
-        var conn = config.GetValue<string>("DB_CONNECTION") ??
-                   "Host=swaga-sber-postgres;Port=5432;Database=db;Username=user;Password=pass";
+        var conn = config.GetValue<string>("DB_CONNECTION") ?? 
+                   "Host=db;Port=5432;Database=db;Username=user;Password=pass";
+
 
         builder.Services.AddHangfire(config => config
             .UseSimpleAssemblyNameTypeSerializer()
@@ -219,13 +220,17 @@ public static class Program
                 Scheme = "Bearer",
                 BearerFormat = "JWT"
             });
-
+            
             options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                 {
                     new OpenApiSecurityScheme
                     {
-                        Type = SecuritySchemeType.Http
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
                     },
                     new string[] { }
                 }

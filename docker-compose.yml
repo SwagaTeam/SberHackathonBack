@@ -35,7 +35,9 @@ services:
       dockerfile: docker/Dockerfile.Server
     environment:
       - DOTNET_RUNNING_IN_CONTAINER=true
-      - JWT_KEY=1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+      - JWT_KEY=AAAAB3NzaC1yc2EAAAABJQAAACEA3N1qw1YmAimBUVDFVgHdDulVCiQuBtCaDYQEf5FGMhM
+      - TELEGRAM_BOT_TOKEN=8368555733:AAGCgEu1ULrkjoQxWnQjavaA2ahlRRGQPdA
+      - TELEGRAM_CHAT_ID=5919096262
     restart: always
     depends_on:
       db:
