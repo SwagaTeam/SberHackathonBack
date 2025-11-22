@@ -5,7 +5,11 @@ using Infrastructure.DAL.Repository.Abstractions;
 
 namespace Application.Services.Implementations;
 
-public class BookService(IBorrowRecordRepository borrowRecordRepository, IBookRepository bookRepository, ILibraryService libraryService, ILibraryBookService libraryBookService) : IBookService
+public class BookService(
+    IBorrowRecordRepository borrowRecordRepository,
+    IBookRepository bookRepository,
+    ILibraryService libraryService,
+    ILibraryBookService libraryBookService, IReviewRepository reviewRepository) : IBookService
 {
     public async Task<Guid> CreateBook(CreateBookRequest bookReq)
     {
@@ -31,6 +35,7 @@ public class BookService(IBorrowRecordRepository borrowRecordRepository, IBookRe
         await libraryBookService.CreateAsync(book.Id, bookReq.LibraryId);
         return book.Id;
     }
+
     public async Task<IEnumerable<Book>> ListByUserIdAsync(Guid userId)
     {
         var borrowRecords = await borrowRecordRepository.GetByUserId(userId);
@@ -87,9 +92,29 @@ public class BookService(IBorrowRecordRepository borrowRecordRepository, IBookRe
             ReturnBy = returnBy,
             ReservedDate = DateTime.Now
         };
-        
+
         await borrowRecordRepository.AddAsync(borrowRecord);
         await borrowRecordRepository.SaveChangesAsync();
         return book.Id;
+    }
+
+    public async Task<Guid> SendReview(ReviewDto req)
+    {
+        var entity = new Review
+        {
+            BookId = req.BookId,
+            Text = req.Text,
+            Author = req.Author,
+            AuthorId = req.UserId,
+            BookName = req.BookName,
+        };
+
+        await reviewRepository.AddAsync(entity);
+        await reviewRepository.SaveChangesAsync();
+        var book = await bookRepository.GetByIdAsync(req.BookId);
+        var avg = book.Reviews.Average(x => x.Rating);
+        book.Rating = avg;
+        await bookRepository.SaveChangesAsync();
+        return entity.Id;
     }
 }

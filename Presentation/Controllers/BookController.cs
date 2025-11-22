@@ -40,4 +40,12 @@ public class BookController(IBookService bookService, IAIService aiService, IAut
         var bookId = await bookService.CreateBook(req);
         return Ok(bookId);
     }
+
+    [HttpPost("review-book/{id}")]
+    [Authorize]
+    public async Task<IActionResult> SendReview([FromBody] ReviewDto review)
+    {
+        var reviewId = await bookService.SendReview(review);
+        return Ok(reviewId);
+    }
 }

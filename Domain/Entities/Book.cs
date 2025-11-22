@@ -13,7 +13,8 @@ public class Book
     public int PageCount { get; set; }
     public string ImageUrl { get; set; }
     public string Language { get; set; }
+    public double Rating { get; set; }
     
     public virtual ICollection<BorrowRecord> BorrowRecords { get; set; } = new List<BorrowRecord>();
-
+    public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 }
