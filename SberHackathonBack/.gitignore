@@ -418,7 +418,7 @@ FodyWeavers.xsd
 *.msp
 
 # JetBrains Rider / IntelliJ / .idea
-.idea/
+.ideaпш
 *.iml
 *.ipr
 *.iws
