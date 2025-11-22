@@ -1,11 +1,6 @@
 import { useState } from 'react';
 import { Login } from './components/Login';
-import { ReaderHome } from './components/ReaderHome';
-import { Catalog } from './components/Catalog';
-import { Events } from './components/Events';
-import { Profile } from './components/Profile';
 import { StaffScanner } from './components/StaffScanner';
-import { BottomNav } from './components/BottomNav';
 import { QRScanner } from './components/QRScanner';
 import { RegistrationConfirmation } from './components/RegistrationConfirmation';
 import { BookingConfirmation } from './components/BookingConfirmation';
@@ -19,21 +14,16 @@ import { BookFormModal } from './components/BookFormModal';
 import { BulkImport } from './components/BulkImport';
 import { EventManagement } from './components/EventManagement';
 import { EventFormModal } from './components/EventFormModal';
-import { BookDetail } from './components/BookDetail';
-import { ReservationSuccess } from './components/ReservationSuccess';
 import { AnalyticsDashboard } from './components/AnalyticsDashboard';
-import { BookCart } from './components/BookCart';
 import { RenewalRequests } from './components/RenewalRequests';
-import { type Book, type Event, type Review, mockReviews } from './lib/mockData';
+import { type Book, type Event} from './lib/mockData';
 import { Toaster } from './components/ui/sonner';
 
 type UserRole = 'reader' | 'staff' | 'admin';
 type StaffScreen = 'scanner' | 'qr-scanner' | 'registration-confirm' | 'booking-confirm' | 'result' | 'renewals';
 type AdminScreen = 'dashboard' | 'users' | 'staff-management' | 'books' | 'events' | 'renewals' | 'analytics' | 'bulk-import';
-type ReaderScreen = 'home' | 'catalog' | 'events' | 'profile' | 'book-detail' | 'reservation-success' | 'cart';
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] = useState<ReaderScreen>('home');
   const [staffScreen, setStaffScreen] = useState<StaffScreen>('scanner');
   const [adminScreen, setAdminScreen] = useState<AdminScreen>('dashboard');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -44,14 +34,6 @@ export default function App() {
   const [showEventForm, setShowEventForm] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | undefined>();
   const [editingEvent, setEditingEvent] = useState<Event | undefined>();
-  const [selectedBook, setSelectedBook] = useState<Book | undefined>();
-
-  // Cart state
-  const [cartBooks, setCartBooks] = useState<Book[]>([]);
-
-  // Reviews state
-  const [reviews, setReviews] = useState<Review[]>(mockReviews);
-
   // Mock data for confirmations
   const mockUserData = {
     memberId: 'LIB-2024-001234',
@@ -67,50 +49,15 @@ export default function App() {
     } else {
       setUserRole(userType);
     }
-    setCurrentScreen('home');
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
     setUserRole('reader');
-    setCurrentScreen('home');
     setStaffScreen('scanner');
     setAdminScreen('dashboard');
-    setCartBooks([]);
   };
 
-  const handleAddToCart = (book: Book) => {
-    if (!cartBooks.find((b) => b.id === book.id)) {
-      setCartBooks([...cartBooks, book]);
-    }
-  };
-
-  const handleRemoveFromCart = (bookId: string) => {
-    setCartBooks(cartBooks.filter((b) => b.id !== bookId));
-  };
-
-  const handleConfirmBooking = () => {
-    // In a real app, this would create reservations
-    setCurrentScreen('reservation-success');
-    setCartBooks([]);
-  };
-
-  const isBookInCart = (bookId: string) => {
-    return cartBooks.some((b) => b.id === bookId);
-  };
-
-  const handleAddReview = (bookId: string, rating: number, comment: string) => {
-    const newReview: Review = {
-      id: `review-${Date.now()}`,
-      bookId,
-      userName: 'Sarah Mitchell', // In real app, use actual logged-in user
-      userId: '1',
-      rating,
-      comment,
-      date: new Date().toISOString().split('T')[0],
-    };
-    setReviews([...reviews, newReview]);
-  };
 
   // Show login screen if not logged in
   if (!isLoggedIn) {
@@ -304,53 +251,6 @@ export default function App() {
             Logout
           </button>
         </div>
-
-        {/* Main Content */}
-        <div className="pb-20 max-w-md mx-auto">
-          {currentScreen === 'home' && <ReaderHome />}
-          {currentScreen === 'catalog' && (
-            <Catalog onBookClick={(book) => {
-              setSelectedBook(book);
-              setCurrentScreen('book-detail');
-            }} />
-          )}
-          {currentScreen === 'events' && <Events />}
-          {currentScreen === 'profile' && <Profile />}
-          {currentScreen === 'cart' && (
-            <BookCart
-              books={cartBooks}
-              onBack={() => setCurrentScreen('catalog')}
-              onRemoveBook={handleRemoveFromCart}
-              onConfirmBooking={handleConfirmBooking}
-            />
-          )}
-          {currentScreen === 'book-detail' && selectedBook && (
-            <BookDetail
-              book={selectedBook}
-              onBack={() => setCurrentScreen('catalog')}
-              onReserve={() => setCurrentScreen('reservation-success')}
-              onAddToCart={handleAddToCart}
-              isInCart={isBookInCart(selectedBook.id)}
-              reviews={reviews}
-              onAddReview={handleAddReview}
-            />
-          )}
-          {currentScreen === 'reservation-success' && selectedBook && (
-            <ReservationSuccess
-              book={selectedBook}
-              reservationId={`RES-${Date.now()}`}
-              expiryTime={new Date(Date.now() + 3600000).toLocaleString('ru-RU')}
-              onDone={() => setCurrentScreen('home')}
-            />
-          )}
-        </div>
-
-        {/* Bottom Navigation */}
-        <BottomNav
-          currentScreen={currentScreen}
-          onNavigate={setCurrentScreen}
-          cartCount={cartBooks.length}
-        />
       </div>
     </>
   );
