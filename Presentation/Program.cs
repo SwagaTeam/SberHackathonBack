@@ -6,12 +6,13 @@ using Application.Notifications;
 using Application.Services.Abstractions;
 using Application.Services.Implementations;
 using Application.Storage;
-using Domain.Entities;
 using DotNetEnv;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Infrastructure;
 using Infrastructure.DAL;
+using Infrastructure.DAL.Repository.Abstractions;
+using Infrastructure.DAL.Repository.Implementations;
 using Infrastructure.Initializers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -20,9 +21,10 @@ using Serilog;
 using Serilog.Events;
 using Shared.Encrypt;
 using Shared.Middleware;
-// using Telegram.Bot;
-// using Telegram.Bot.Requests;
-// using Telegram.Bot.Types.Enums;
+using Telegram.Bot;
+using Telegram.Bot.Requests;
+using Telegram.Bot.Types.Enums;
+
 
 namespace Presentation;
 
@@ -100,7 +102,7 @@ public static class Program
             {
                 options.UseNpgsqlConnection(conn);
             }));
-
+        
         builder.Services.AddHttpClient(); // Register HttpClient for DI
         builder.Services.AddScoped<IPasswordHasher, PasswordHasher>(); // Or use a more general version
 
@@ -119,6 +121,8 @@ public static class Program
         builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
         builder.Services.AddScoped<IEventService, EventService>();
+
+        var tgChatId = config.GetValue<string>("TELEGRAM_CHAT_ID") ?? "";
 
         builder.Services.AddCors(options =>
         {
@@ -147,8 +151,8 @@ public static class Program
         builder.Services.AddEndpointsApiExplorer();
         ConfigureSwagger(builder);
 
-        // Telegram - ??? ????????????????
-        // ConfigureTelegramNotify(builder);
+        // Telegram - ??????????? ? ????? ??????
+        ConfigureTelegramNotify(builder);
     }
 
     private static void ConfigureJwtAuthentication(WebApplicationBuilder builder)
@@ -221,11 +225,7 @@ public static class Program
                 {
                     new OpenApiSecurityScheme
                     {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
+                        Type = SecuritySchemeType.Http
                     },
                     new string[] { }
                 }
@@ -238,41 +238,36 @@ public static class Program
         });
     }
 
-    // Telegram - ????????????????
     private static void ConfigureTelegramNotify(WebApplicationBuilder builder)
     {
-        // ????????????????
-
         // ?????? ?????? ???? ??? ??? ??????
-        // UseWebHook = builder.Configuration.GetValue<bool>("Telegram:UseWebhook");
-        // WebhookUrl = builder.Configuration["Telegram:WebhookUrl"];
+        UseWebHook = builder.Configuration.GetValue<bool>("Telegram:UseWebhook");
+        WebhookUrl = builder.Configuration["Telegram:WebhookUrl"];
 
-        // var tgToken = builder.Configuration.GetValue<string>("TELEGRAM_BOT_TOKEN") ?? 
-        //               builder.Configuration.GetValue<string>("Telegram:Token") ?? "";
+        var tgToken = builder.Configuration.GetValue<string>("TELEGRAM_BOT_TOKEN") ??
+                      builder.Configuration.GetValue<string>("Telegram:Token") ?? "";
 
-        // singleton client
-        /*
+        // singleton client (бот)
         builder.Services.AddSingleton<ITelegramBotClient>(_ => new TelegramBotClient(tgToken));
-        */
 
-        // core handlers
-        // builder.Services.AddScoped<TelegramMessageHandler>();
-        // builder.Services.AddScoped<TgEventNotificationHandler>();
+        // handlers и репозитории Ч scoped
+        builder.Services.AddScoped<IChatRepository, ChatRepository>();
+        builder.Services.AddScoped<TelegramMessageHandler>();
+        builder.Services.AddScoped<TgEventNotificationHandler>();
 
-        // notification service (????? ???????? default chat id ?? env)
-        // var defaultChatId = builder.Configuration.GetValue<string>("TELEGRAM_CHAT_ID");
+        // TelegramNotificationService Ч scoped (т.к. требует репозиторий)
+        builder.Services.AddScoped<TelegramNotificationService>(sp =>
+            new TelegramNotificationService(
+                sp.GetRequiredService<ITelegramBotClient>(),
+                sp.GetRequiredService<IChatRepository>(),
+                null));
 
-        // ???????????? ?????????? ?????????? ??? singleton
-        /*builder.Services.AddSingleton<TelegramNotificationService>(sp =>
-            new TelegramNotificationService(sp.GetRequiredService<ITelegramBotClient>(), defaultChatId));
-            */
+        // прив€зываем интерфейс
+        builder.Services.AddScoped<INotificationService>(sp => sp.GetRequiredService<TelegramNotificationService>());
 
-        // ????????? ????????? ? ??? ?? ??????????
-        // builder.Services.AddSingleton<INotificationService>(sp => sp.GetRequiredService<TelegramNotificationService>());
-
-        // hosted polling worker ?????? ???? ?? webhook
-        /*if (!UseWebHook)
-            builder.Services.AddHostedService<TelegramBotWorker>();*/
+        // hosted polling worker Ч оставл€ем (он создаЄт scope дл€ обработки сообщений)
+        if (!UseWebHook)
+            builder.Services.AddHostedService<TelegramBotWorker>();
     }
 
     private static async Task InitializeDatabaseAsync(WebApplication app)
@@ -302,13 +297,11 @@ public static class Program
         app.UseHangfireDashboard("/hangfire");
         app.MapControllers();
 
-        // Telegram webhook / polling init - ????????????????
-        /*
+        // Telegram webhook / polling init
         var botClient = app.Services.GetRequiredService<ITelegramBotClient>();
-        */
         var ct = CancellationToken.None;
 
-        /*try
+        try
         {
             if (UseWebHook)
             {
@@ -332,18 +325,14 @@ public static class Program
                 var delResult = await botClient.SendRequest(new DeleteWebhookRequest { DropPendingUpdates = true }, ct);
                 Log.Information("DeleteWebhook result: {Result}", delResult);
 
-                /*
                 var info = await botClient.SendRequest(new GetWebhookInfoRequest(), ct);
-                #1#
                 Log.Information("Webhook info after delete: {Url}", info?.Url ?? "<none>");
             }
         }
         catch (Exception ex)
         {
-            /*
             Log.Error(ex, "Telegram webhook/polling init failed");
-            #1#
             // ?? ?????? ?????????, ?? ???????? ? ??????????
-        }*/
+        }
     }
 }

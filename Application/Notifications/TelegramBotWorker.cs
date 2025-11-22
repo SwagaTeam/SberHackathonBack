@@ -42,7 +42,7 @@ public class TelegramBotWorker : BackgroundService
                 {
                     await using var scope = _scopeFactory.CreateAsyncScope();
                     var messageHandler = scope.ServiceProvider.GetRequiredService<TelegramMessageHandler>();
-                    await messageHandler.HandleStartCommand(update.Message.Chat.Id);
+                    await messageHandler.HandleUpdateAsync(update.Message.Chat.Id, update.Message.Text, token);
                 }
             },
             async (bot, exception, token) => { Console.WriteLine($"Ошибка polling: {exception.Message}"); },

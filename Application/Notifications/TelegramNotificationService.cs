@@ -1,4 +1,5 @@
 ﻿using Application.Services.Abstractions;
+using Infrastructure.DAL.Repository.Abstractions;
 using Telegram.Bot;
 using Telegram.Bot.Requests;
 using Telegram.Bot.Types.Enums;
@@ -9,10 +10,12 @@ namespace Application.Notifications
     {
         private readonly ITelegramBotClient _botClient;
         private readonly string? _defaultChatId;
+        private readonly IChatRepository _chatRepository;
 
-        public TelegramNotificationService(ITelegramBotClient botClient, string? defaultChatId)
+        public TelegramNotificationService(ITelegramBotClient botClient, IChatRepository chatRepository, string? defaultChatId)
         {
             _botClient = botClient;
+            _chatRepository = chatRepository;
             _defaultChatId = defaultChatId;
         }
 
@@ -30,7 +33,6 @@ namespace Application.Notifications
                     ChatId = cid,
                     Text = message
                 };
-                // возвращаемый тип Message
                 await _botClient.SendRequest(req);
             }
             catch (Exception ex)
@@ -39,9 +41,27 @@ namespace Application.Notifications
             }
         }
 
-        public Task SendPushAsync(Guid userId, string title, string body)
+        public async Task SendTelegramToPhoneAsync(string phoneNumber, string message)
         {
-            return Task.CompletedTask;
+            if (string.IsNullOrWhiteSpace(phoneNumber))
+                return;
+            var normalized = NormalizePhone(phoneNumber);
+            var chat = await _chatRepository.GetByPhoneNumber(normalized);
+            if (chat == null)
+            {
+                Console.WriteLine($"No chat linked to phone {normalized}");
+                return;
+            }
+
+            await SendTelegramAsync(chat.ChatId, message);
         }
+
+        private static string NormalizePhone(string input)
+        {
+            var digits = new string((input??"").Where(char.IsDigit).ToArray());
+            return "+" + digits; // предполагаем хранение в формате +{digits}
+        }
+
+        public Task SendPushAsync(Guid userId, string title, string body) => Task.CompletedTask;
     }
 }
