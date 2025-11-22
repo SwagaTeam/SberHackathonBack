@@ -205,14 +205,14 @@ public static class Program
         {
             options.SwaggerDoc("v1", new OpenApiInfo
             {
-                Title = "Library Ticker API",
+                Title = "Deputy API",
                 Version = "v1",
-                Description = "API ??? ?????????? ????????????? ??????"
+                Description = "API дл€ депутатского приложени€"
             });
 
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
-                Description = "??????? ??? JWT",
+                Description = "¬ведите 'Bearer' [пробел] и ваш JWT",
                 Name = "Authorization",
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.Http,
@@ -225,7 +225,11 @@ public static class Program
                 {
                     new OpenApiSecurityScheme
                     {
-                        Type = SecuritySchemeType.Http
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
                     },
                     new string[] { }
                 }
